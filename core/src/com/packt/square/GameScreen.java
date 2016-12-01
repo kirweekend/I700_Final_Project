@@ -5,7 +5,9 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.MathUtils;
 
 import java.awt.*;
 
@@ -14,82 +16,118 @@ import java.awt.*;
  */
 public class GameScreen extends ScreenAdapter {
     private SpriteBatch batch;
-    private Texture squareMain;
+    private Texture coin;
     private static final float MOVE_TIME = 0.1F;
-    private static final int SQUARE_MOVEMENT = 32;
+    public static final int SQUARE_MOVEMENT = 32;
     private float timer = MOVE_TIME;
-    private static final int RIGHT = 0;
-    private static final int LEFT = 1;
-    private static final int UP = 2;
-    private static final int DOWN = 3;
-    private static final int START = 4;
-    private int squareX = 320, squareY = 240;
-    private int squareDirection = START;
+    public static boolean coinUsable = false;
+    public static int coinX, coinY;
+    public static STATE state = STATE.PLAYING;
+    private BitmapFont bitmapFont;
+    public static final int POINTS_PER_COIN = 10;
 
-    @Override
-    public void show() {
-        squareMain = new Texture(Gdx.files.internal(("squaremain.png")));
-        batch = new SpriteBatch();
+    public enum STATE {
+        PLAYING, GAME_OVER
+    }
+
+    private void checkForRestart() {
+        if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) doRestart();
+    }
+
+    private void doRestart() {
+        state = STATE.PLAYING;
+        timer = MOVE_TIME;
+        Player.resetPlayers();
+        coinUsable = false;
+    }
+
+    private void placeCoin() {
+        if (!coinUsable) {
+            coinX = MathUtils.random(Gdx.graphics.getWidth() / SQUARE_MOVEMENT - 1) * SQUARE_MOVEMENT;
+            coinY = MathUtils.random((Gdx.graphics.getHeight() - 40) / SQUARE_MOVEMENT - 1) * SQUARE_MOVEMENT;
+            coinUsable = true;
+        }
+    }
+
+    private void checkCollision() {
+        for (Player player : Player.getPlayers()) {
+            player.checkCollision();
+        }
+    }
+
+    private void keyboardInput() {
+        for (Player player : Player.getPlayers()) {
+            player.keyboardInput();
+        }
+    }
+
+    private void draw() {
+        batch.begin();
+        if (state == STATE.PLAYING) {
+            int playerIndex = 0;
+            for (Player player : Player.getPlayers()) {
+                String scoreAsString = Integer.toString(player.score);
+                bitmapFont.draw(batch, scoreAsString, 60 + 100 * (playerIndex), 440);
+                player.draw(batch);
+                playerIndex++;
+            }
+        }
+        if (coinUsable && state != GameScreen.STATE.GAME_OVER) {
+            batch.draw(coin, coinX, coinY);
+        }
+        if (state == GameScreen.STATE.GAME_OVER) {
+            bitmapFont.draw(batch, "You died!", Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
+        }
+        batch.end();
+    }
+
+    private void clearScreen() {
+        Gdx.gl.glClearColor(Color.BLACK.getRed(), Color.BLACK.getGreen(), Color.BLACK.getBlue(), Color.BLACK.getAlpha());
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
     }
 
     private void checkBounds() {
-        if (squareX >= Gdx.graphics.getWidth()) {
-            squareX = 0;
+        for (Player player : Player.getPlayers()) {
+            player.checkBounds();
         }
-        if (squareX < 0) {
-            squareX = Gdx.graphics.getWidth() - SQUARE_MOVEMENT;
-        }
-        if (squareY >= Gdx.graphics.getHeight()) {
-            squareY = 0;
-        }
-        if (squareY < 0) {
-            squareY = Gdx.graphics.getHeight() - SQUARE_MOVEMENT;
+    }
+
+    private void moveEntities() {
+        for (Player player : Player.getPlayers()) {
+            player.move();
         }
     }
 
     @Override
     public void render(float delta) {
-        keyboardInput();
-        timer -= delta;
-        if (timer <= 0) {
-            timer = MOVE_TIME;
-            moveSquare();
+        switch (state) {
+            case PLAYING: {
+                keyboardInput();
+                checkCollision();
+                placeCoin();
+                timer -= delta;
+                if (timer <= 0) {
+                    timer = MOVE_TIME;
+                    moveEntities();
+                    checkBounds();
+                }
+            }
+            break;
+            case GAME_OVER: {
+                checkForRestart();
+            }
+            break;
         }
-        checkBounds();
-        Gdx.gl.glClearColor(Color.BLACK.getRed(), Color.BLACK.getGreen(), Color.BLACK.getBlue(), Color.BLACK.getAlpha());
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        batch.begin();
-        batch.draw(squareMain, squareX, squareY);
-        batch.end();
+        clearScreen();
+        draw();
     }
 
-    private void moveSquare() {
-        switch (squareDirection) {
-            case RIGHT: {
-                squareX += SQUARE_MOVEMENT;
-                return;
-            }
-            case LEFT: {
-                squareX -= SQUARE_MOVEMENT;
-                return;
-            }
-            case UP: {
-                squareY += SQUARE_MOVEMENT;
-                return;
-            }
-        }
-    }
-
-    private void keyboardInput() {
-        boolean lPressed = Gdx.input.isKeyPressed(Input.Keys.LEFT);
-        boolean rPressed = Gdx.input.isKeyPressed(Input.Keys.RIGHT);
-        boolean uPressed = Gdx.input.isKeyPressed(Input.Keys.UP);
-        boolean dPressed = Gdx.input.isKeyPressed(Input.Keys.DOWN);
-        boolean isPressed = Gdx.input.isKeyPressed(Input.Keys.SPACE);
-        if (lPressed) squareDirection = LEFT;
-        if (rPressed) squareDirection = RIGHT;
-        if (uPressed) squareDirection = UP;
-        if (dPressed) squareDirection = DOWN;
-        if (isPressed) squareDirection = START;
+    @Override
+    public void show() {
+        placeCoin();
+        Player player = new Player();
+        bitmapFont = new BitmapFont();
+        coin = new Texture(Gdx.files.internal("ls.png"));
+        batch = new SpriteBatch();
     }
 }
