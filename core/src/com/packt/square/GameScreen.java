@@ -124,10 +124,11 @@ public class GameScreen extends ScreenAdapter {
 
     @Override
     public void show() {
-        placeCoin();
         Player player = new Player();
+        Player playerTwo = new PlayerTwo();
+        placeCoin();
         bitmapFont = new BitmapFont();
-        coin = new Texture(Gdx.files.internal("ls.png"));
+        coin = new Texture(Gdx.files.internal("coin.png"));
         batch = new SpriteBatch();
     }
 }

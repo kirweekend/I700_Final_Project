@@ -43,13 +43,13 @@ public class Player {
         }
     }
 
+
     public Player() {
         // Adds this player to the static players collection
         players.add(this);
-
-        setSpawnPosition();
         squareX = playerSpawnPositionX;
         squareY = playerSpawnPositionY;
+        setSpawnPosition();
         setPicture();
     }
 
