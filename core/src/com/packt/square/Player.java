@@ -21,6 +21,7 @@ public class Player {
     protected static final int UP = 2;
     protected static final int DOWN = 3;
     protected static final int START = 4;
+    protected boolean check = false;
     protected Rectangle square;
     public int score = 0;
 
@@ -51,6 +52,7 @@ public class Player {
         setSpawnPosition();
         square = new Rectangle(playerSpawnPositionX, playerSpawnPositionY, 32, 32);
         setPicture();
+        checkBounds();
     }
 
     public void setSpawnPosition() {
@@ -62,19 +64,25 @@ public class Player {
         squareMain = new Texture(Gdx.files.internal(("squarv.png")));
     }
 
-    public void checkBounds() {
+    public boolean checkBounds() {
         if (square.x >= Gdx.graphics.getWidth()) {
+            check = true;
+            GameScreen.state = GameScreen.STATE.GAME_OVER;
+        }else if (square.x < 0) {
+            check = true;
+            GameScreen.state = GameScreen.STATE.GAME_OVER;
+        }else if (square.y >= Gdx.graphics.getHeight()) {
+            check = true;
             GameScreen.state = GameScreen.STATE.GAME_OVER;
         }
-        if (square.x < 0) {
+        else if (square.y < 0) {
+            check = true;
             GameScreen.state = GameScreen.STATE.GAME_OVER;
         }
-        if (square.y >= Gdx.graphics.getHeight()) {
-            GameScreen.state = GameScreen.STATE.GAME_OVER;
+        else {
+            check = false;
         }
-        if (square.y < 0) {
-            GameScreen.state = GameScreen.STATE.GAME_OVER;
-        }
+        return check;
     }
 
     public void draw(SpriteBatch batch) {

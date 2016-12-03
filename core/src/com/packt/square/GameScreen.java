@@ -29,7 +29,6 @@ public class GameScreen extends ScreenAdapter {
     Player player1 = new Player();
     PlayerTwo player2 = new PlayerTwo();
 
-
     public enum STATE {
         PLAYING,
         GAME_OVER
@@ -75,11 +74,15 @@ public class GameScreen extends ScreenAdapter {
         }
     }
 
-    private void checkWhoWon() {
-        if (player1.score > player2.score) {
-            bitmapFont.draw(batch, "Player One Won", 275, 270);
-        } else if (player1.score < player2.score) {
+    private void mainLogic() {
+        if (player1.checkBounds() == true) {
             bitmapFont.draw(batch, "Player Two Won", 275, 270);
+        } else if (player2.checkBounds() == true) {
+            bitmapFont.draw(batch, "Player One Won", 275, 270);
+        } else if (player1.score > player2.score) {
+            bitmapFont.draw(batch, "Player One Won", 275, 250);
+        } else if (player1.score < player2.score) {
+            bitmapFont.draw(batch, "Player Two Won", 275, 250);
         } else {
             bitmapFont.draw(batch, "Draw", 285, 270);
         }
@@ -102,7 +105,7 @@ public class GameScreen extends ScreenAdapter {
         }
         if (state == GameScreen.STATE.GAME_OVER) {
             bitmapFont.draw(batch, "Game Over ", 282, 290);
-            checkWhoWon();
+            mainLogic();
         }
 
         batch.end();
@@ -131,6 +134,9 @@ public class GameScreen extends ScreenAdapter {
             case PLAYING: {
                 keyboardInput();
                 placeCoin();
+                if (player1.score + player2.score == 100) {
+                    state = STATE.GAME_OVER;
+                }
                 checkCollision();
                 checkPlayerCollision();
             }
