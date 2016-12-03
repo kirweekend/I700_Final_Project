@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Rectangle;
 
 import java.util.ArrayList;
 
@@ -20,6 +21,7 @@ public class Player {
     protected static final int UP = 2;
     protected static final int DOWN = 3;
     protected static final int START = 4;
+    protected Rectangle square;
     public int score = 0;
 
     protected int squareDirection = START;
@@ -37,25 +39,23 @@ public class Player {
     public static void resetPlayers() {
         for (Player player : Player.getPlayers()) {
             player.squareDirection = START;
-            player.squareX = player.playerSpawnPositionX;
-            player.squareY = player.playerSpawnPositionY;
+            player.square.x = player.playerSpawnPositionX;
+            player.square.y = player.playerSpawnPositionY;
             player.score = 0;
         }
     }
 
-
     public Player() {
         // Adds this player to the static players collection
         players.add(this);
-        squareX = playerSpawnPositionX;
-        squareY = playerSpawnPositionY;
         setSpawnPosition();
+        square = new Rectangle(playerSpawnPositionX, playerSpawnPositionY, 32, 32);
         setPicture();
     }
 
     public void setSpawnPosition() {
-        playerSpawnPositionX = 0;
-        playerSpawnPositionY = 0;
+        playerSpawnPositionX = 224;
+        playerSpawnPositionY = 288;
     }
 
     public void setPicture() {
@@ -63,22 +63,22 @@ public class Player {
     }
 
     public void checkBounds() {
-        if (squareX >= Gdx.graphics.getWidth()) {
+        if (square.x >= Gdx.graphics.getWidth()) {
             GameScreen.state = GameScreen.STATE.GAME_OVER;
         }
-        if (squareX < 0) {
+        if (square.x < 0) {
             GameScreen.state = GameScreen.STATE.GAME_OVER;
         }
-        if (squareY >= Gdx.graphics.getHeight()) {
+        if (square.y >= Gdx.graphics.getHeight()) {
             GameScreen.state = GameScreen.STATE.GAME_OVER;
         }
-        if (squareY < 0) {
+        if (square.y < 0) {
             GameScreen.state = GameScreen.STATE.GAME_OVER;
         }
     }
 
     public void draw(SpriteBatch batch) {
-        batch.draw(squareMain, squareX, squareY);
+        batch.draw(squareMain, square.x, square.y);
     }
 
     public void keyboardInput() {
@@ -95,7 +95,7 @@ public class Player {
     }
 
     public void checkCollision() {
-        if (GameScreen.coinX == squareX && GameScreen.coinY == squareY) {
+        if (GameScreen.coinX == square.x && GameScreen.coinY == square.y) {
             GameScreen.coinUsable = false;
             addToScore();
         }
@@ -108,19 +108,19 @@ public class Player {
     public void move() {
         switch (squareDirection) {
             case RIGHT: {
-                squareX += GameScreen.SQUARE_MOVEMENT;
+                square.x += GameScreen.SQUARE_MOVEMENT;
                 return;
             }
             case LEFT: {
-                squareX -= GameScreen.SQUARE_MOVEMENT;
+                square.x -= GameScreen.SQUARE_MOVEMENT;
                 return;
             }
             case UP: {
-                squareY += GameScreen.SQUARE_MOVEMENT;
+                square.y += GameScreen.SQUARE_MOVEMENT;
                 return;
             }
             case DOWN: {
-                squareY -= GameScreen.SQUARE_MOVEMENT;
+                square.y -= GameScreen.SQUARE_MOVEMENT;
             }
 
         }

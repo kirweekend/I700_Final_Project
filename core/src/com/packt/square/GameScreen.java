@@ -17,6 +17,7 @@ import java.awt.*;
 public class GameScreen extends ScreenAdapter {
     private SpriteBatch batch;
     private Texture coin;
+    private Texture background;
     private static final float MOVE_TIME = 0.1F;
     public static final int SQUARE_MOVEMENT = 32;
     private float timer = MOVE_TIME;
@@ -25,9 +26,13 @@ public class GameScreen extends ScreenAdapter {
     public static STATE state = STATE.PLAYING;
     private BitmapFont bitmapFont;
     public static final int POINTS_PER_COIN = 10;
+    Player player1 = new Player();
+    PlayerTwo player2 = new PlayerTwo();
+
 
     public enum STATE {
-        PLAYING, GAME_OVER
+        PLAYING,
+        GAME_OVER
     }
 
     private void checkForRestart() {
@@ -42,7 +47,7 @@ public class GameScreen extends ScreenAdapter {
     }
 
     private void placeCoin() {
-        if (!coinUsable) {
+        if (!coinUsable && (player2.squareDirection != 4 || player1.squareDirection != 4)) {
             coinX = MathUtils.random(Gdx.graphics.getWidth() / SQUARE_MOVEMENT - 1) * SQUARE_MOVEMENT;
             coinY = MathUtils.random((Gdx.graphics.getHeight() - 40) / SQUARE_MOVEMENT - 1) * SQUARE_MOVEMENT;
             coinUsable = true;
@@ -61,13 +66,33 @@ public class GameScreen extends ScreenAdapter {
         }
     }
 
+    public void checkPlayerCollision() {
+        if (player1.square.x < player2.square.x + 32 &&
+                player1.square.x + 32 > player2.square.x &&
+                player1.square.y < player2.square.y + 32 &&
+                32 + player1.square.y > player2.square.y) {
+            state = STATE.GAME_OVER;
+        }
+    }
+
+    private void checkWhoWon() {
+        if (player1.score > player2.score) {
+            bitmapFont.draw(batch, "Player One Won", 275, 270);
+        } else if (player1.score < player2.score) {
+            bitmapFont.draw(batch, "Player Two Won", 275, 270);
+        } else {
+            bitmapFont.draw(batch, "Draw", 285, 270);
+        }
+    }
+
     private void draw() {
         batch.begin();
+        batch.draw(background, 0, 0);
         if (state == STATE.PLAYING) {
             int playerIndex = 0;
             for (Player player : Player.getPlayers()) {
                 String scoreAsString = Integer.toString(player.score);
-                bitmapFont.draw(batch, scoreAsString, 60 + 100 * (playerIndex), 440);
+                bitmapFont.draw(batch, scoreAsString, 220 + 192 * (playerIndex), 440);
                 player.draw(batch);
                 playerIndex++;
             }
@@ -76,8 +101,10 @@ public class GameScreen extends ScreenAdapter {
             batch.draw(coin, coinX, coinY);
         }
         if (state == GameScreen.STATE.GAME_OVER) {
-            bitmapFont.draw(batch, "You died!", Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
+            bitmapFont.draw(batch, "Game Over ", 282, 290);
+            checkWhoWon();
         }
+
         batch.end();
     }
 
@@ -103,15 +130,16 @@ public class GameScreen extends ScreenAdapter {
         switch (state) {
             case PLAYING: {
                 keyboardInput();
-                checkCollision();
                 placeCoin();
+                checkCollision();
+                checkPlayerCollision();
+            }
                 timer -= delta;
                 if (timer <= 0) {
                     timer = MOVE_TIME;
                     moveEntities();
                     checkBounds();
                 }
-            }
             break;
             case GAME_OVER: {
                 checkForRestart();
@@ -124,8 +152,7 @@ public class GameScreen extends ScreenAdapter {
 
     @Override
     public void show() {
-        Player player = new Player();
-        Player playerTwo = new PlayerTwo();
+        background = new Texture(Gdx.files.internal("background.jpg"));
         placeCoin();
         bitmapFont = new BitmapFont();
         coin = new Texture(Gdx.files.internal("coin.png"));

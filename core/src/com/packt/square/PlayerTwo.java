@@ -23,8 +23,8 @@ public class PlayerTwo extends Player{
     }
 
     public void setSpawnPosition() {
-        playerSpawnPositionX = 608;
-        playerSpawnPositionY = 448;
+        playerSpawnPositionX = 384;
+        playerSpawnPositionY = 288;
     }
 
     public void setPicture() {
