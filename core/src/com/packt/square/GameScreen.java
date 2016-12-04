@@ -3,6 +3,7 @@ package com.packt.square;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -26,6 +27,7 @@ public class GameScreen extends ScreenAdapter {
     public static STATE state = STATE.PLAYING;
     private BitmapFont bitmapFont;
     public static final int POINTS_PER_COIN = 10;
+    private Music song;
     Player player1 = new Player();
     PlayerTwo player2 = new PlayerTwo();
 
@@ -38,11 +40,17 @@ public class GameScreen extends ScreenAdapter {
         if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) doRestart();
     }
 
+    public void music() {
+        song = Gdx.audio.newMusic(Gdx.files.internal("mymusic.mp3"));
+        song.play();
+    }
+
     private void doRestart() {
         state = STATE.PLAYING;
         timer = MOVE_TIME;
         Player.resetPlayers();
         coinUsable = false;
+        song.play();
     }
 
     private void placeCoin() {
@@ -71,20 +79,21 @@ public class GameScreen extends ScreenAdapter {
                 player1.square.y < player2.square.y + 32 &&
                 32 + player1.square.y > player2.square.y) {
             state = STATE.GAME_OVER;
+            song.stop();
         }
     }
 
     private void mainLogic() {
         if (player1.checkBounds() == true) {
-            bitmapFont.draw(batch, "Player Two Won", 275, 270);
+            bitmapFont.draw(batch, "Player Two Won", 120, 200);
         } else if (player2.checkBounds() == true) {
-            bitmapFont.draw(batch, "Player One Won", 275, 270);
+            bitmapFont.draw(batch, "Player One Won", 120, 200);
         } else if (player1.score > player2.score) {
-            bitmapFont.draw(batch, "Player One Won", 275, 250);
+            bitmapFont.draw(batch, "Player One Won", 120, 200);
         } else if (player1.score < player2.score) {
-            bitmapFont.draw(batch, "Player Two Won", 275, 250);
+            bitmapFont.draw(batch, "Player Two Won", 120, 200);
         } else {
-            bitmapFont.draw(batch, "Draw", 285, 270);
+            bitmapFont.draw(batch, "Draw", 260, 210);
         }
     }
 
@@ -104,8 +113,9 @@ public class GameScreen extends ScreenAdapter {
             batch.draw(coin, coinX, coinY);
         }
         if (state == GameScreen.STATE.GAME_OVER) {
-            bitmapFont.draw(batch, "Game Over ", 282, 290);
+            bitmapFont.draw(batch, "Game Over ", 180, 270);
             mainLogic();
+            song.stop();
         }
 
         batch.end();
@@ -158,9 +168,11 @@ public class GameScreen extends ScreenAdapter {
 
     @Override
     public void show() {
+        music();
         background = new Texture(Gdx.files.internal("background.jpg"));
         placeCoin();
-        bitmapFont = new BitmapFont();
+        bitmapFont = new BitmapFont(Gdx.files.internal("fonts/font.fnt"),
+                Gdx.files.internal("fonts/font.png"), false);
         coin = new Texture(Gdx.files.internal("coin.png"));
         batch = new SpriteBatch();
     }
