@@ -8,5 +8,3 @@ This game is developped using libGDX.
 * The player who went out of area loses.
 * If players collides with each other game is over, winner is determined by points.
 * Game lasts until 100 points are collected by two players in total.
-##As someone said:
-> while(!(succeed = try()))
