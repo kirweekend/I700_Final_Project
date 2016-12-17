@@ -72,9 +72,7 @@ public class MainMenuScreen extends ScreenAdapter {
         TextButton exitGameButton = new TextButton("Exit", skin);
         exitGameButton.addListener(new ClickListener() {
             @Override
-            public void clicked(InputEvent event, float x, float y) {
-                Gdx.app.exit();
-            }
+            public void clicked(InputEvent event, float x, float y) {Gdx.app.exit();}
         });
 
         table.add(gameInfo).padBottom(80).padTop(15);

@@ -30,10 +30,13 @@ public class GameScreen extends ScreenAdapter {
     private Music song;
     Player player1 = new Player();
     PlayerTwo player2 = new PlayerTwo();
+    PauseMenu pauseMenu = new PauseMenu();
 
     public enum STATE {
         PLAYING,
-        GAME_OVER
+        GAME_OVER,
+        PAUSE,
+        RESUME
     }
 
     private void checkForRestart() {
@@ -56,7 +59,7 @@ public class GameScreen extends ScreenAdapter {
     private void placeCoin() {
         if (!coinUsable && (player2.squareDirection != 4 || player1.squareDirection != 4)) {
             coinX = MathUtils.random(Gdx.graphics.getWidth() / SQUARE_MOVEMENT - 1) * SQUARE_MOVEMENT;
-            coinY = MathUtils.random((Gdx.graphics.getHeight() - 40) / SQUARE_MOVEMENT - 1) * SQUARE_MOVEMENT;
+            coinY = MathUtils.random((Gdx.graphics.getHeight() - 64) / SQUARE_MOVEMENT - 1) * SQUARE_MOVEMENT;
             coinUsable = true;
         }
     }
@@ -68,6 +71,7 @@ public class GameScreen extends ScreenAdapter {
     }
 
     private void keyboardInput() {
+
         for (Player player : Player.getPlayers()) {
             player.keyboardInput();
         }
@@ -150,30 +154,46 @@ public class GameScreen extends ScreenAdapter {
                 checkCollision();
                 checkPlayerCollision();
             }
-                timer -= delta;
-                if (timer <= 0) {
-                    timer = MOVE_TIME;
-                    moveEntities();
-                    checkBounds();
-                }
+            timer -= delta;
+            if (timer <= 0) {
+                timer = MOVE_TIME;
+                moveEntities();
+                checkBounds();
+            }
             break;
             case GAME_OVER: {
                 checkForRestart();
             }
             break;
+            case PAUSE: {
+                draw();
+                pauseMenu.render(delta);
+            }
+            break;
         }
-        clearScreen();
-        draw();
+
+            clearScreen();
+            draw();
+
     }
 
     @Override
-    public void show() {
-        music();
-        background = new Texture(Gdx.files.internal("background.jpg"));
-        placeCoin();
-        bitmapFont = new BitmapFont(Gdx.files.internal("fonts/font.fnt"),
-                Gdx.files.internal("fonts/font.png"), false);
-        coin = new Texture(Gdx.files.internal("coin.png"));
-        batch = new SpriteBatch();
+    public void pause() {
+        // Called when game is paused and right before exit
+        if (state != STATE.GAME_OVER) {
+            state = STATE.PAUSE;
+        }
     }
+
+        @Override
+        public void show () {
+            music();
+            background = new Texture(Gdx.files.internal("background.jpg"));
+            placeCoin();
+            bitmapFont = new BitmapFont(Gdx.files.internal("fonts/font.fnt"),
+                    Gdx.files.internal("fonts/font.png"), false);
+            coin = new Texture(Gdx.files.internal("coin.png"));
+            batch = new SpriteBatch();
+        }
+
 }

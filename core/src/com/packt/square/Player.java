@@ -95,6 +95,7 @@ public class Player {
         boolean uPressed = Gdx.input.isKeyPressed(Input.Keys.W);
         boolean dPressed = Gdx.input.isKeyPressed(Input.Keys.S);
         boolean isPressed = Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT);
+
         if (lPressed) squareDirection = LEFT;
         if (rPressed) squareDirection = RIGHT;
         if (uPressed) squareDirection = UP;
