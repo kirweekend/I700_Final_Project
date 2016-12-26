@@ -113,8 +113,11 @@ public class GameScreen extends ScreenAdapter {
                 playerIndex++;
             }
         }
-        if (coinUsable && state != GameScreen.STATE.GAME_OVER) {
+        if (coinUsable && state == STATE.PLAYING) {
             batch.draw(coin, coinX, coinY);
+        }
+        if (state == STATE.PAUSE) {
+            bitmapFont.draw(batch, "Pause ", 240, 300);
         }
         if (state == GameScreen.STATE.GAME_OVER) {
             bitmapFont.draw(batch, "Game Over ", 180, 270);
@@ -142,10 +145,17 @@ public class GameScreen extends ScreenAdapter {
         }
     }
 
+    private void checkPause() {
+        if (Gdx.input.isKeyPressed(Input.Keys.P)) {
+            state = STATE.PAUSE;
+        }
+    }
+
     @Override
     public void render(float delta) {
         switch (state) {
             case PLAYING: {
+                checkPause();
                 keyboardInput();
                 placeCoin();
                 if (player1.score + player2.score == 100) {
@@ -166,20 +176,20 @@ public class GameScreen extends ScreenAdapter {
             }
             break;
             case PAUSE: {
-                draw();
                 pauseMenu.render(delta);
             }
             break;
+            case RESUME: {
+                state = STATE.PLAYING;
+            }
         }
 
             clearScreen();
             draw();
 
     }
-
     @Override
     public void pause() {
-        // Called when game is paused and right before exit
         if (state != STATE.GAME_OVER) {
             state = STATE.PAUSE;
         }

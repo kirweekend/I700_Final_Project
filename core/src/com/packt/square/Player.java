@@ -13,8 +13,6 @@ import java.util.ArrayList;
  */
 public class Player {
     protected Texture squareMain;
-    protected int squareX;
-    protected int squareY;
 
     protected static final int RIGHT = 0;
     protected static final int LEFT = 1;
